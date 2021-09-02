@@ -1,0 +1,23 @@
+.chat-component{
+    background-color: white;
+    display: flex;
+    margin: 10px;
+    border-radius: 10px;
+
+}
+
+.chat-image-container{
+    background-color: red;
+    margin: 10px;
+    height: 10vh;
+    width: 10vh;
+}
+
+.chat-text-container{
+    background-color: white;
+    text-align: left;
+    margin: 10px;
+    width: 95vh;
+    overflow-wrap: break-word;
+  
+}

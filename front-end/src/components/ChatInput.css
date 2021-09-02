@@ -1,0 +1,37 @@
+.chat-input-container{
+    background-color:aliceblue;
+    flex-basis: 10%;
+    text-align:left;
+    padding: 10px;
+    display: flex;
+
+}
+
+.chat-input-container textarea{
+    width: 90%;
+    height: 100%;
+    resize: none;
+    border-style: none;
+    box-shadow: none;
+    border-radius: 10px;
+}
+
+.send-icon{
+    background-color: rgb(5, 255, 5);
+    align-self: center  ;
+    width: 10%;
+    height: 60%;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.send-icon-hover{
+    background-color: gold;
+    align-self: center  ;
+    width: 10%;
+    height: 60%;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+}
