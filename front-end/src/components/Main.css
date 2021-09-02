@@ -21,7 +21,7 @@
 .chat-contents{
     display: flex;
     flex-direction: column-reverse;
-    height: 600px;
+    flex-basis: 90%;
     overflow: auto;
 }
 
@@ -29,4 +29,27 @@
     background-color: aqua;
     flex-basis: 25%;
     display: flex;
+    flex-direction: column;
 }
+
+.menu-contents{
+    flex-basis: 75%;
+    overflow: auto;
+}
+
+.menu-input-container{
+    flex-basis: 25%;
+    background-color: rgb(71, 71, 248);
+    display: flex;
+    flex-direction: column;
+}
+
+.new-group-button-container{
+    background-color: aqua;
+    flex-basis: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+

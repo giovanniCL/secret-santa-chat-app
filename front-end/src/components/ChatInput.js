@@ -5,17 +5,9 @@ import './ChatInput.css'
 const ChatInput = (props) => {
     const {addChat} = props
 
-    //const [text, setText] = useState()
     const [mouseHover, setMouseHover] = useState(false)
 
     const chat_text = useRef(null)
-
-    /*
-    useEffect(()=>{
-        if(!text) return
-        addChat(text)
-    },[text])
-    */
 
     function sendText(){
         if(!chat_text.current.value) return
