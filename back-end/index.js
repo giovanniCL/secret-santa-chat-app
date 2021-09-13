@@ -1,9 +1,18 @@
-const { group } = require('console')
+require('dotenv').config()
 const express = require('express')
 const http = require('http')
 const socket_io = require('socket.io')
+const db = require('./db')
+const cors = require('cors')
+
+const auth = require('./routes/Auth')
+const User = require('./schemas/User')
 
 const app = express()
+app.use(cors({
+    origin: 'http://localhost:3000'
+}))
+app.use('/auth',auth)
 const server = http.createServer(app)
 const io = socket_io(server, {
     cors:{
@@ -16,7 +25,14 @@ const rooms = []
 
 io.on('connection', socket=>{
     console.log('New Web Socket Connection...')
-    socket.on('message', (message, group_code, callback)=>{
+    // let new_user = new User({
+    //     username: 'pepe',
+    //     password: 'password',
+    //     groups : [],
+    //     socket_id: '1234'
+    // })
+    // new_user.save().then(()=>console.log('new user saved'))
+    socket.on('message', async (message, group_code, callback)=>{
         console.log(message)
         console.log(group_code)
         socket.broadcast.to(group_code).emit('receive-message',message)

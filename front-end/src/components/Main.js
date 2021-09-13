@@ -1,12 +1,15 @@
 import React,{useState, useEffect} from 'react'
+import axios from 'axios'
 import ChatInput from './ChatInput'
 import ChatComponent from './ChatComponent'
 import GroupComponent from './GroupComponent'
 import AddGroup from './AddGroup'
+import UserWindow from './UserWindow'
 import {Button} from 'react-bootstrap'
 import io from 'socket.io-client'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Main.css'
+require('dotenv').config()
 
 const socket = io.connect('http://localhost:8080')
 
@@ -19,6 +22,9 @@ const Main = (props) =>{
     }])
     const [selectedGroup, setSelectedGroup] = useState({})
     const [newGroupFlag, setNewGroupFlag] = useState(false)
+    const [loginSelected, setLoginSelected] = useState(false)
+    const [auth, setAuth] = useState(false)
+    const [user, setUser] = useState()
 
     useEffect(()=>{
         socket.on('hello-world', (message)=>console.log(message))
@@ -27,6 +33,16 @@ const Main = (props) =>{
         })
         return(()=>socket.close())
     },[])
+
+    useEffect(async ()=>{
+        if(!auth) return
+        let response = await axios.get(`${process.env.REACT_APP_BACKEND}/auth/me`,{
+            headers:{
+                'x-access-token': auth
+            }
+        })
+        if(response.data.auth === true) setUser(response.data.user)
+    },[auth])
 
     /*
     useEffect(()=>{
@@ -61,6 +77,19 @@ const Main = (props) =>{
         setSelectedGroup(group)
     }
 
+    async function handleLogin(user){
+        let response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/login`,{
+            username: user.username,
+            password: user.password
+        })
+        setAuth(response.data.token)
+        return response.data
+    }
+    function handleLogout(){
+        setUser(null)
+        setAuth(false)
+    }
+
 
     return(
         <div className= "main-content">
@@ -73,6 +102,12 @@ const Main = (props) =>{
                 <ChatInput addChat={addChat}/>
             </div>
             <div className = 'menu-container'>
+                <div className = 'menu-header'>
+                    <Button variant = {auth ? 'warning':'success'} 
+                    onClick = {()=>setLoginSelected(prev => !prev)}>{auth ? 'Settings' : 'Login'}</Button>
+                    {(loginSelected ? <UserWindow user={user} handleLogin={handleLogin} handleLogout={handleLogout}/> : '')}
+
+                </div>
                 <div className = 'menu-contents'>
                     {groups.map((group, id) => (
                         <GroupComponent key={id} new={false} 
