@@ -67,6 +67,20 @@ router.get('/me', async (req, res)=>{
     }catch(error){
         res.status(500).send(error)
     }
+})
+
+router.post('/socket_id', async (req, res)=>{
+    const token = req.headers['x-access-token']
+    if (!token) return res.status(401).send({ auth: false, message: 'No token provided.' });
+    try{
+        const decoded = await jwt.verify(token, process.env.SECRET)
+        const user = await User.findByIdAndUpdate({_id: decoded.id}, {socket_id: req.body.socket_id})
+        if(user) return res.status(201).send({auth: true, message: "updated socket id"})
+        return res.send({auth: false, message: "user not found"})
+
+    }catch(error){
+        res.status(500).send(error)
+    }
 
 
 })

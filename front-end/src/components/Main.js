@@ -11,28 +11,37 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './Main.css'
 require('dotenv').config()
 
-const socket = io.connect('http://localhost:8080')
+let socket
 
 const Main = (props) =>{
 
     const [chats, setChats] = useState([])
-    const [groups, setGroups] = useState([{
-        name: 'Dummy Group',
-        code: '123456'
-    }])
+    const [groups, setGroups] = useState([])
     const [selectedGroup, setSelectedGroup] = useState({})
     const [newGroupFlag, setNewGroupFlag] = useState(false)
     const [loginSelected, setLoginSelected] = useState(false)
-    const [auth, setAuth] = useState(false)
+    const [auth, setAuth] = useState()
     const [user, setUser] = useState()
 
-    useEffect(()=>{
-        socket.on('hello-world', (message)=>console.log(message))
-        socket.on('receive-message', message=>{
-            setChats(prevChats=> [message, ...prevChats])
+    useEffect(async ()=>{
+        if(!user) return
+        if(socket) socket.close()
+        socket = io.connect('http://localhost:8080')
+        socket.on('connect', async()=>{
+            let response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/socket_id`,{
+                socket_id: socket.id
+            },{
+                headers:{
+                    'x-access-token': auth
+                }
+            })
+            console.log(response.data)
+        })
+        socket.on('receive-message', (message, group_code)=>{
+            if(group_code === selectedGroup.group_code) setChats(prevChats=> [message, ...prevChats])
         })
         return(()=>socket.close())
-    },[])
+    },[user])
 
     useEffect(async ()=>{
         if(!auth) return
@@ -52,7 +61,7 @@ const Main = (props) =>{
     */
 
     function addChat(chat){
-        socket.emit('message', chat, selectedGroup.code,()=>{
+        socket.emit('message', chat, selectedGroup.group_code,()=>{
             let newChats = [chat,...chats]
             setChats(newChats)
         })
@@ -90,6 +99,15 @@ const Main = (props) =>{
         setAuth(false)
     }
 
+    async function handleSignup(user){
+        let response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/signup`,{
+            username: user.username,
+            password: user.password
+        })
+        setAuth(response.data.token)
+        return response.data
+    }
+
 
     return(
         <div className= "main-content">
@@ -105,7 +123,9 @@ const Main = (props) =>{
                 <div className = 'menu-header'>
                     <Button variant = {auth ? 'warning':'success'} 
                     onClick = {()=>setLoginSelected(prev => !prev)}>{auth ? 'Settings' : 'Login'}</Button>
-                    {(loginSelected ? <UserWindow user={user} handleLogin={handleLogin} handleLogout={handleLogout}/> : '')}
+                    {(loginSelected ? <UserWindow user={user} 
+                    handleLogin={handleLogin} handleLogout={handleLogout} 
+                    handleSignup={handleSignup} /> : '')}
 
                 </div>
                 <div className = 'menu-contents'>

@@ -12,7 +12,6 @@ const GroupComponent = (props)  => {
     function addGroupWrapper(){
         addGroup({
             name: groupName.current.value,
-            code: '42069XD'
         })
         setNewFlag(false)
     }
@@ -23,7 +22,7 @@ const GroupComponent = (props)  => {
         !newFlag ?
         (<div className = {props.selected === true ? 'selected-group-container':'group-container'} onClick={changeSelectedGroupWrapper}>
             <h4>{props.children ? props.children.name : ""}</h4>
-            <h6>Group Code: {props.children ? props.children.code : ""}</h6>
+            <h6>Group Code: {props.children ? props.children.group_code : ""}</h6>
         </div>)
         :(
             <div className = 'new-group-container'>
