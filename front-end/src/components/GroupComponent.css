@@ -6,6 +6,14 @@
     text-align: left;
     padding-left: 5px;;
 }
+.selected-group-container{
+    background-color: gold;
+    margin: 10px;
+    height: 15vh;
+    border-radius: 10px;
+    text-align: left;
+    padding-left: 5px;;
+}
 
 .new-group-container{
     background-color: aquamarine;
