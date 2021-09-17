@@ -17,48 +17,66 @@ const Main = (props) =>{
 
     const [chats, setChats] = useState([])
     const [groups, setGroups] = useState([])
-    const [selectedGroup, setSelectedGroup] = useState({})
+    const [selectedGroup, setSelectedGroup] = useState()
     const [newGroupFlag, setNewGroupFlag] = useState(false)
     const [loginSelected, setLoginSelected] = useState(false)
     const [auth, setAuth] = useState()
     const [user, setUser] = useState()
 
-    useEffect(async ()=>{
-        if(!user) return
+    useEffect(()=>{
+        if(!auth) return
+        async function fetchData(){
+            let response = await axios.get(`${process.env.REACT_APP_BACKEND}/auth/me`,{
+                headers:{
+                    'x-access-token': auth
+                }
+            })
+            if(response.data.auth === true) setUser(response.data.user)
+        }
+        fetchData()
+    },[auth])
+
+    useEffect(()=>{
         if(socket) socket.close()
+        if(!user) return
         socket = io.connect('http://localhost:8080')
         socket.on('connect', async()=>{
-            let response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/socket_id`,{
+            let socket_id_response = await axios.post(`${process.env.REACT_APP_BACKEND}/auth/socket_id`,{
                 socket_id: socket.id
             },{
                 headers:{
                     'x-access-token': auth
                 }
             })
-            console.log(response.data)
-        })
-        socket.on('receive-message', (message, group_code)=>{
-            if(group_code === selectedGroup.group_code) setChats(prevChats=> [message, ...prevChats])
+            
+            let groups_response = await axios.get(`${process.env.REACT_APP_BACKEND}/groups/all`,{
+                headers: {
+                    'x-access-token': auth
+                }
+            })
+            setGroups((prev_groups) => groups_response.data.groups)
+
         })
         return(()=>socket.close())
     },[user])
 
-    useEffect(async ()=>{
-        if(!auth) return
-        let response = await axios.get(`${process.env.REACT_APP_BACKEND}/auth/me`,{
-            headers:{
-                'x-access-token': auth
-            }
-        })
-        if(response.data.auth === true) setUser(response.data.user)
-    },[auth])
-
-    /*
     useEffect(()=>{
-        console.log("GROUPS: ")
-        groups.forEach(group=>console.log(group))
+        if(groups.length === 0) return
+        setSelectedGroup((prev_selected)=> groups[0])
+        let group_codes = groups.map(group=>group.group_code)
+        if(socket) socket.emit('get-groups', group_codes)
     },[groups])
-    */
+
+    useEffect(()=>{
+        if(!selectedGroup) return
+        socket.removeListener('receive-message')
+        socket.on('receive-message', (message, group_code)=>{
+            if(!selectedGroup) return console.log('no group selected')
+            if(group_code === selectedGroup.group_code){
+                setChats(prevChats=> [message, ...prevChats])
+            } 
+        })
+    }, [selectedGroup])
 
     function addChat(chat){
         socket.emit('message', chat, selectedGroup.group_code,()=>{
@@ -131,7 +149,7 @@ const Main = (props) =>{
                 <div className = 'menu-contents'>
                     {groups.map((group, id) => (
                         <GroupComponent key={id} new={false} 
-                        selected={group.name === selectedGroup.name}
+                        selected={selectedGroup ? group.name === selectedGroup.name : false}
                         changeSelectedGroup={changeSelectedGroup} 
                         addGroup={addGroup}>{group}</GroupComponent>
                     ))}

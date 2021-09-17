@@ -31,7 +31,6 @@ const UserWindow = (props) =>{
             username: username_input.current.value,
             password: password_input.current.value
         }
-        console.log(user_to_signup)
         let response = await handleSignup(user_to_signup)
         if(response.auth === false){
             setErrorMessage(response.message)
